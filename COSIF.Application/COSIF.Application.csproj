@@ -1,0 +1,15 @@
+
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\COSIF.Domain\COSIF.Domain.csproj" />
+    <ProjectReference Include="..\COSIF.Infrastructure\COSIF.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

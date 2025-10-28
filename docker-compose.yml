@@ -1,0 +1,38 @@
+
+version: '3.8'
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: cosif_sqlserver
+    environment:
+      SA_PASSWORD: "123"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserverdata:/var/opt/mssql
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.Api
+    depends_on:
+      - sqlserver
+    environment:
+      ConnectionStrings__COSIF: "Server=localhost,1433;Database=COSIF;User Id=sa;Password=123"
+    ports:
+      - "5000:80"
+
+  blazor:
+    build:
+      context: .
+      dockerfile: Dockerfile.Blazor
+    depends_on:
+      - api
+    environment:
+      ConnectionStrings__COSIF: "Server=localhost,1433;Database=COSIF;User Id=sa;Password=123"
+    ports:
+      - "5001:80"
+
+volumes:
+  sqlserverdata:
