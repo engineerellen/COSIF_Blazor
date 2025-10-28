@@ -1,12 +1,30 @@
-
-# Use .NET 9 SDK image
+# Build stage
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
-WORKDIR /app
+WORKDIR /src
 
+# Copy csproj(s) first to leverage Docker layer cache (adjust paths if needed)
+COPY ["src/COSIF.Api/COSIF.Api.csproj", "COSIF.Api/"]
+# If there are other project references, copy their csproj files here too.
+
+RUN dotnet restore "COSIF.Api/COSIF.Api.csproj"
+
+# Copy everything and publish (no-restore because we already restored)
 COPY ./src ./src
-RUN dotnet publish src/COSIF.Api -c Release -o /app/publish
+WORKDIR /src/COSIF.Api
+RUN dotnet publish -c Release -o /app/publish --no-restore
 
-FROM mcr.microsoft.com/dotnet/aspnet:9.0
+# Runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 WORKDIR /app
-COPY --from=build /app/publish .
+
+# Optional: create non-root user for security
+RUN adduser --disabled-password --gecos "" appuser && chown -R appuser /app
+USER appuser
+
+COPY --from=build /app/publish ./
+
+# Listen on port 80 and configure ASP.NET Core to bind
+EXPOSE 80
+ENV ASPNETCORE_URLS=http://+:80
+
 ENTRYPOINT ["dotnet", "COSIF.Api.dll"]

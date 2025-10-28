@@ -1,10 +1,29 @@
-
+# Build stage
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
-WORKDIR /app
-COPY ./src ./src
-RUN dotnet publish src/COSIF.WEB -c Release -o /app/publish
+WORKDIR /src
 
-FROM mcr.microsoft.com/dotnet/aspnet:9.0
+# Copy csproj(s) and restore first to leverage layer caching
+COPY ["src/COSIF.WEB/COSIF.WEB.csproj", "COSIF.WEB/"]
+# (if other projects are referenced, copy their csproj files here similarly)
+RUN dotnet restore "COSIF.WEB/COSIF.WEB.csproj"
+
+# Copy remaining sources and publish
+COPY ./src ./src
+WORKDIR /src/COSIF.WEB
+RUN dotnet publish -c Release -o /app/publish --no-restore
+
+# Runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 WORKDIR /app
-COPY --from=build /app/publish .
+
+# Optional: run as non-root user
+RUN adduser --disabled-password --gecos "" appuser && chown -R appuser /app
+USER appuser
+
+COPY --from=build /app/publish ./
+
+# Recommended: listen on port 80
+EXPOSE 80
+ENV ASPNETCORE_URLS=http://+:80
+
 ENTRYPOINT ["dotnet", "COSIF.WEB.dll"]
