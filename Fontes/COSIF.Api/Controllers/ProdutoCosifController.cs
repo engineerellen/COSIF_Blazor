@@ -18,7 +18,7 @@ namespace COSIF.Api.Controllers
             return Ok(itens);
         }
 
-        [HttpGet("codProduto")]
+        [HttpGet("getCosif")]
         public async Task<IActionResult> Get(string codProduto)
         {
             var itens = await _service.GetCosifByProdutoAsync(codProduto);
