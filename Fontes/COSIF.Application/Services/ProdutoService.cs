@@ -23,5 +23,18 @@ namespace COSIF.Application.Services
                 return new List<Produto>();
             }
         }
+
+        public async Task<Produto?> GetProdutoByCodigoAsync(string codProduto)
+        {
+            try
+            {
+                var produto = await _repo.GetProdutoByCodigoAsync(codProduto);
+                return produto;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
     }
 }

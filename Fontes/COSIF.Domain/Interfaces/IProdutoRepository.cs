@@ -5,5 +5,7 @@ namespace COSIF.Domain.Interfaces
     public interface IProdutoRepository
     {
         Task<IEnumerable<Produto>> GetProdutosAsync();
+
+        Task<Produto?> GetProdutoByCodigoAsync(string codProduto);
     }
 }
